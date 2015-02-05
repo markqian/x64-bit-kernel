@@ -23,7 +23,7 @@ print_string_long_loop:
     jmp print_string_long_loop
 
 print_string_long_done:
-    pop rdx
     pop rax
+    pop rdx
 
     ret
