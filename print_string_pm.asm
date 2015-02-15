@@ -4,7 +4,10 @@ VIDEO_MEMORY equ 0xb8000
 WHITE_ON_BLACK equ 0x0f
 
 print_string_pm:
-	pusha
+    	push ebx
+    	push edx
+    	push eax
+    
 	mov edx, VIDEO_MEMORY
 
 print_string_pm_loop:
@@ -22,5 +25,7 @@ print_string_pm_loop:
 	jmp print_string_pm_loop
 
 print_string_pm_done:
-	popa
+    	pop eax
+        pop edx
+    	pop ebx
 	ret

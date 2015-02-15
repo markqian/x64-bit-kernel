@@ -26,42 +26,91 @@ SwitchToLongMode:
     cld
     rep stosd
     pop edi                            ; Get DI back.
- 
- 
+    
+; zero out tables
+    push edi
+    
+    mov eax, 0x0
+.ZeroOutAllTable:
+    mov [edi], eax	;zero out
+    add edi, 4			
+    cmp edi, 0x4000	
+    jb .ZeroOutAllTable
+
+    pop edi
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Need to load each page table address into page directory.                                   ;;                         
+;; Each page table is offset by 4kb and points to 2 mb of physical memory.              ;;  
+;; each directory entry is 8 bytes with 512 entries. So in total 512 * 8 = 4096 bytes ;;
+;; level 4 page map is located at edi + 0x0000                                                        ;;                             
+;; page directory pointer is located at edi + 0x1000                                                ;;                              
+;; first page directory is located at edi + 0x2000                                                     ;;                              
+;; page table is located at edi + 0x3000                                                                  ;;                               
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
     ; Build the Page Map Level 4.
     ; es:di points to the Page Map Level 4 table.    
     lea eax, [edi + 0x1000]         ; Put the address of the Page Directory Pointer Table in to EAX.
     or eax, PAGE_PRESENT | PAGE_WRITE ; Or EAX with the flags - present flag, writable flag.
     mov [edi], eax                  ; Store the value of EAX as the first PML4E.
- 
- 
+
     ; Build the Page Directory Pointer Table.
     lea eax, [edi + 0x2000]         ; Put the address of the Page Directory in to EAX.
     or eax, PAGE_PRESENT | PAGE_WRITE ; Or EAX with the flags - present flag, writable flag.
     mov [edi + 0x1000], eax         ; Store the value of EAX as the first PDPTE.
- 
- 
+
     ; Build the Page Directory.
     lea eax, [edi + 0x3000]         ; Put the address of the Page Table in to EAX.
     or eax, PAGE_PRESENT | PAGE_WRITE ; Or EAX with the flags - present flag, writeable flag.
     mov [edi + 0x2000], eax         ; Store to value of EAX as the first PDE.
- 
- 
+   
+ ; Build the Identity map.
     push edi                           ; Save DI for the time being.
     lea edi, [edi + 0x3000]             ; Point DI to the page table.
-    mov eax, PAGE_PRESENT | PAGE_WRITE    ; Move the flags into EAX - and point it to 0x0000.
+    mov eax, PAGE_PRESENT | PAGE_WRITE    ; Move the flags into EAX - and point it to 0x0000.	
  
- 
-    ; Build the Page Table.
-.LoopPageTable:
+.LoopIdentityPageTable:
     mov [edi], eax
     add eax, 0x1000
     add edi, 8
     cmp eax, 0x200000                 ; If we did all 2MiB, end.
-    jb .LoopPageTable
+    jb .LoopIdentityPageTable
  
     pop edi                            ; Restore DI.
- 
+
+    ;; build kernel map
+
+    ;; fill last entry of  PML4 with address edi + 0x4000
+    lea eax, [edi + 0x4000]         ; Put the address of the Page Directory Pointer Table in to EAX.
+    or eax, PAGE_PRESENT | PAGE_WRITE ; Or EAX with the flags - present flag, writable flag.
+    mov [edi+0xff8], eax                  ; Store the value of EAX as the last PML4E.
+
+    ;; fill entry 510 of PDPT at edi + 0x4000
+    lea eax, [edi + 0x5000]	
+    or eax, PAGE_PRESENT | PAGE_WRITE ; need to change this to point to kernel memory address
+    mov [edi + 0x4FF0], eax
+
+    ;; fill first entry of PD
+    lea eax, [edi + 0x6000]
+    or eax, PAGE_PRESENT | PAGE_WRITE
+    mov [edi + 0x5000], eax	
+
+    ;; fill 2m of memory in PT
+    push edi                           ; Save DI for the time being.
+    lea edi, [edi + 0x6000]             ; Point DI to the page table.
+    lea eax, [0x100000]
+    or eax, PAGE_PRESENT | PAGE_WRITE    ; Move the flags into EAX - and point it to 0x100000.	
+
+.LoopKernelPageTable:
+    mov [edi], eax
+    add eax, 0x1000
+    add edi, 8
+    cmp eax, 0x200000
+    jb .LoopKernelPageTable
+    
+    pop edi                            ; Restore DI.
+    
     ; Disable IRQs
     mov al, 0xFF                      ; Out 0xFF to 0xA1 and 0x21 to disable all IRQs.
     out 0xA1, al
@@ -117,5 +166,5 @@ LongMode:
     mov es, ax
     mov fs, ax
     mov gs, ax
- 
+    
     jmp BEGIN_LM                     ; You should replace this jump to wherever you want to jump to.

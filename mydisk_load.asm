@@ -11,11 +11,17 @@ mydisk_load:
     jc disk_error
 
     ; Get boot catalog sector offset
-    mov bx, [KERNEL_OFFSET + BootCatalogSectorOffset]
+    push es
+    mov bx, 0xf00
+    mov es, bx
+    mov bx, [es:0x1047]
+    pop es
+
     push dx
     mov dx, bx
     call print_hex
     pop dx
+    
     ; Load boot catalog sector
     mov [BootCatalogSector], bx
     mov si, BootCatalogAddressPacket
@@ -24,25 +30,21 @@ mydisk_load:
     jc disk_error
     
     ; Read disk sector offset
-    mov bx, [KERNEL_OFFSET + BootLoaderOffset]
-    push dx
-    mov dx, bx
-    call print_hex
-    pop dx
+    push es
+    mov bx, 0xf00
+    mov es, bx
+    mov bx, [es:0x1028]
+    pop es
 
     ;; Get sector below, which is where the kernel is located
     add bx, 1
+    
     ; Load disk sector 
     mov [DiskSector], bx
     mov si, DiskAddressPacket
     mov ah,0x42			
     int 0x13
     jc disk_error
-
-    push dx
-    mov dx, [KERNEL_OFFSET]
-    call print_hex
-    pop dx
 
     popa
     ret
@@ -60,31 +62,31 @@ success:
     ret
     
 DiskAddressPacket:        
-DiskSize:   	db 0x10			;size of packet
-DiskZero:   	db 0				;always 0
-DiskTransfers:	dw 1			;number of sectors to read
+DiskSize:   	db 0x10				;size of packet
+DiskZero:   	db 0					;always 0
+DiskTransfers:	dw 16				;number of sectors to read
 DiskOffset: 	dw KERNEL_OFFSET		;offset
-DiskSegment:	dw 0			;segment
-DiskSector: 	dd 0				;starting LBA #
-DiskUpper:  	dd 0   			;used for upper part of 48 bit LBAs
+DiskSegment:	dw 0xf00				;segment
+DiskSector: 	dd 0					;starting LBA #
+DiskUpper:  	dd 0   				;used for upper part of 48 bit LBAs
 
 DescriptorAddressPacket:        
-DescriptorSize:		db 0x10		;size of packet
-DescriptorZero:	db 0			;always 0
-DescriptorTransfers:	dw 1		;number of sectors to read
-DescriptorOffset:   	dw KERNEL_OFFSET	;offset
-DescriptorSegment:  dw 0		;segment
-DescriptorSector:   	dd 17		;starting LBA #
-DescriptorUpper:    	dd 0   		;used for upper part of 48 bit LBAs
+DescriptorSize:		db 0x10				;size of packet
+DescriptorZero:	db 0					;always 0
+DescriptorTransfers:	dw 1				;number of sectors to read
+DescriptorOffset:   	dw KERNEL_OFFSET		;offset
+DescriptorSegment:  dw 0xf00				;segment
+DescriptorSector:   	dd 17				;starting LBA #
+DescriptorUpper:    	dd 0   				;used for upper part of 48 bit LBAs
 
 BootCatalogAddressPacket:        
-BootCatalogPacketSize:	db 0x10	 ;size of packet
-BootCatalogZero:    		db 0		 ;always 0
-BootCatalogTransfers:	dw 1	 ;number of sectors to read
-BootCatalogOffset: 	     	dw KERNEL_OFFSET ;offset
-BootCatalogSegment:    	dw 0	 ;segment
-BootCatalogSector:	    	dd 0          ;starting LBA #
-BootCatalogUpper:   	dd 0   	 ;used for upper part of 48 bit LBAs
+BootCatalogPacketSize:	db 0x10	 			;size of packet
+BootCatalogZero:    		db 0		 			;always 0
+BootCatalogTransfers:	dw 1	 			;number of sectors to read
+BootCatalogOffset: 	     	dw KERNEL_OFFSET 	;offset
+BootCatalogSegment:    	dw 0xf00	 			;segment
+BootCatalogSector:	    	dd 0          			;starting LBA #
+BootCatalogUpper:   	dd 0   	 			;used for upper part of 48 bit LBAs
     
     
 DISK_ERROR_MSG:	db "Disk read error!",0

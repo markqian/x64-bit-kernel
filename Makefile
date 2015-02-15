@@ -1,4 +1,4 @@
-CFLAGS=-m32
+CFLAGS=-m64
 
 C_SOURCES = $(wildcard kernel/*.c drivers/*.c)
 HEADERS = $(wildcard kernel/*.h drivers/*.h)
@@ -20,13 +20,13 @@ os-image: boot/boot_sect.bin kernel.bin
 		cat $^ > os-image
 
 kernel.bin: kernel/kernel_entry.o ${OBJ}
-		ld -o $@ -melf_i386 -Ttext 0x1000 $^ --oformat binary
+		x86_64-elf-gcc -ffreestanding -z max-page-size=0x1000 -o $@ -T ./kernel/linker.ld $^ -nostdlib -lgcc
 
 %.o: %.c ${HEADERS}
-		gcc ${CFLAGS} -ffreestanding -c $< -o $@
+		x86_64-elf-gcc -ffreestanding -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -c $< -o $@
 
 %.o: %.asm
-		nasm $< -f elf32 -o $@
+		nasm $< -f elf64 -o $@
 
 boot/boot_sect.bin: boot/boot_sect.asm
 		nasm $< -f bin -o $@

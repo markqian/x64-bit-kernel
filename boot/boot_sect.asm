@@ -3,7 +3,8 @@
     %define FREE_SPACE 0x9000
 
 Main:
-    jmp 0x0000:.FlushCS               ; Some BIOS' may load us at 0x0000:0x7C00 while other may load us at 0x07C0:0x0000.
+    ; Some BIOS' may load us at 0x0000:0x7C00 while other may load us at 0x07C0:0x0000.    
+    jmp 0x0000:.FlushCS               
 
 .FlushCS:
     xor ax, ax
@@ -17,24 +18,36 @@ Main:
     cld
 
     mov [BOOT_DRIVE], dl	
-    call print_hex
-     	    
-    mov sp, 0x8000
 
+    mov bx, MSG_REAL_MODE 
+    call print_string
+    
+    mov sp, Main
+
+    call check_a20
+
+    cmp ax, 0x0
+    jne .LoadKernel
+    call enable_A20
+
+.LoadKernel:    
     call load_kernel
     
     jmp switch_to_pm
-    
     jmp $
-
+    
+%include "checkA20.asm"
+%include "enableA20.asm"
 %include "print_string.asm"
 %include "print_hex.asm"
 %include "mydisk_load.asm"
 %include "gdt.asm"
+%include "print_string_pm.asm"
+%include "print_hex_pm.asm"
 %include "print_string_long.asm"
 %include "switch_to_pm.asm"
 %include "switch_to_long_mode.asm"
-
+    
 [bits 32]
  
 NoLongMode db "ERROR: CPU does not support long mode.", 0x0A, 0x0D, 0
@@ -107,28 +120,24 @@ load_kernel:
     mov dl, [BOOT_DRIVE]
     call mydisk_load
 
-    mov dx, [KERNEL_OFFSET]
-    call print_hex
-
     popa
     ret
+
     
 [bits 64]
     
 BEGIN_LM:
-    mov ebx, MSG_LONG_MODE
-    call print_string_long
-    
-    call KERNEL_OFFSET
+    ; Blank out the screen to a blue color.     call 0x100000
+    call 0x100000
     jmp $
 
-    
+[bits 16]    
 BOOT_DRIVE:  db 0
-MSG_REAL_MODE db "Started in 16-bit Real Mode", 0
-MSG_PROT_MODE db "Successfully landed in 32-bit Protected Mode", 0
-MSG_LONG_MODE db "Successfully landed in Long Mode", 0
+MSG_PROT_MODE:	db "Successfully landed in 32-bit Protected Mode",0
+MSG_LOAD_KERNEL:    db "Loading kernel into memory",0
+MSG_REAL_MODE:	db "Started in 16-bit Real Mode",0
+MSG_LONG_MODE:	db "Successfully landed in Long Mode",0
 
-MSG_LOAD_KERNEL db "Loading kernel into memory", 0
-
-    times 2048-($-$$) db 0xff	
+    times 2046-($-$$) db 0xff	
+    dw 0xaa55
 
