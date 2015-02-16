@@ -59,6 +59,7 @@ load_kernel_segment:
     push edx
     
     mov eax, 0x10000
+
     ;;  this assumes that each page is 4k
     lea edx, [0x100000 - 0x1000]
 
@@ -134,9 +135,11 @@ get_header_offset:
 
     push ebx
     mov ebx, eax	
+
     ;; ebx now contains offset the beginning of the wanted program header
     mov eax, 0x10000
     add eax, ebx
+
     ;; ebx now contains length of program header in bytes
     pop ebx
 

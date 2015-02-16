@@ -80,16 +80,19 @@ SwitchToLongMode:
     pop edi                            ; Restore DI.
 
     ;; build kernel map
+    lea eax, [edi]        
+    or eax, PAGE_PRESENT | PAGE_WRITE
+    mov [edi+0xff0], eax 	;move the first entry of PML4 into its last entry for recursive page mapping. 
 
-    ;; fill last entry of  PML4 with address edi + 0x4000
+    ;; fill second last entry of  PML4 with address edi + 0x4000
     lea eax, [edi + 0x4000]         ; Put the address of the Page Directory Pointer Table in to EAX.
     or eax, PAGE_PRESENT | PAGE_WRITE ; Or EAX with the flags - present flag, writable flag.
     mov [edi+0xff8], eax                  ; Store the value of EAX as the last PML4E.
 
-    ;; fill entry 510 of PDPT at edi + 0x4000
+    ;; fill first entry of PDPT at edi + 0x4000
     lea eax, [edi + 0x5000]	
     or eax, PAGE_PRESENT | PAGE_WRITE ; need to change this to point to kernel memory address
-    mov [edi + 0x4FF0], eax
+    mov [edi + 0x4ff0], eax
 
     ;; fill first entry of PD
     lea eax, [edi + 0x6000]
@@ -100,8 +103,8 @@ SwitchToLongMode:
     push edi                           ; Save DI for the time being.
     lea edi, [edi + 0x6000]             ; Point DI to the page table.
     lea eax, [0x100000]
-    or eax, PAGE_PRESENT | PAGE_WRITE    ; Move the flags into EAX - and point it to 0x100000.	
-
+    or eax, PAGE_PRESENT | PAGE_WRITE    ; Move the flags into EAX - and point it to 0x100000.
+        
 .LoopKernelPageTable:
     mov [edi], eax
     add eax, 0x1000

@@ -2,7 +2,7 @@
 
 stuff that I need to do:
 
--set base address of kernel to be 0xffffffff80000000			    #done
+-set base address of kernel to be 0xffffff0000000000			    #done
 
 -change kernel physical address to start at 0x100000	            #done
 
@@ -15,8 +15,8 @@ stuff that I need to do:
 
 -need to load second stage bootloader
 
--need to setup recursive paging
+-need to setup recursive paging						    #done
 
--need to figure out how to implement keyboard driver, screen driver and file systems.
+-need to figure out how to implement keyboard driver, screen driver and file systems.  
 
--read up on linker scripts to understand how each segment is being mapped.
+-read up on linker scripts to understand how each segment is being mapped.  

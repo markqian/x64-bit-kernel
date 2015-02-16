@@ -45,6 +45,7 @@ Main:
 %include "print_string_pm.asm"
 %include "print_hex_pm.asm"
 %include "print_string_long.asm"
+%include "print_hex_long.asm"
 %include "switch_to_pm.asm"
 %include "switch_to_long_mode.asm"
     
@@ -128,7 +129,11 @@ load_kernel:
     
 BEGIN_LM:
     ; Blank out the screen to a blue color.     call 0x100000
-    call 0x100000
+    mov rbx, 0xffffff0000000008
+    mov rdx, [rbx]
+    call print_hex_long
+    mov rbx, 0xffffffff80000000
+    call rbx		
     jmp $
 
 [bits 16]    
