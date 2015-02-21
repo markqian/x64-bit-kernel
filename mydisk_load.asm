@@ -17,10 +17,6 @@ mydisk_load:
     mov bx, [es:0x1047]
     pop es
 
-    push dx
-    mov dx, bx
-    call print_hex
-    pop dx
     
     ; Load boot catalog sector
     mov [BootCatalogSector], bx
@@ -28,6 +24,7 @@ mydisk_load:
     mov ah,0x42			
     int 0x13
     jc disk_error
+
     
     ; Read disk sector offset
     push es
@@ -35,6 +32,12 @@ mydisk_load:
     mov es, bx
     mov bx, [es:0x1028]
     pop es
+
+    push dx
+    mov dx, bx
+    call print_hex
+    pop dx
+
 
     ;; Get sector below, which is where the kernel is located
     add bx, 1

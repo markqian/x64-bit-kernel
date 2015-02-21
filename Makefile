@@ -14,16 +14,16 @@ bochs: all
 		bochs
 
 os.iso: os-image
-		mkisofs -no-emul-boot -o os.iso -b os-image .
+		mkisofs -no-emul-boot -o os.iso -b os-image cdcontent
 
 os-image: boot/boot_sect.bin kernel.bin
-		cat $^ > os-image
+		cat $^ > ./cdcontent/os-image
 
 kernel.bin: kernel/kernel_entry.o ${OBJ}
-		x86_64-elf-gcc -ffreestanding -z max-page-size=0x1000 -o $@ -T ./kernel/linker.ld $^ -nostdlib -lgcc
+		x86_64-elf-gcc -ffreestanding -z max-page-size=0x1000 -o $@ -T ./kernel/linker.ld $^ -nostdlib -lgcc 
 
 %.o: %.c ${HEADERS}
-		x86_64-elf-gcc -ffreestanding -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -c $< -o $@
+		x86_64-elf-gcc -ffreestanding -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -c $< -o $@ 
 
 %.o: %.asm
 		nasm $< -f elf64 -o $@

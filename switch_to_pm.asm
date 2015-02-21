@@ -24,91 +24,48 @@ init_pm:
 
 
     ;; load kernel elf header
-    ;; load memory based on program header.    
-    ;; need program offset
-    ;; need program segment size
+    ;; load memory based on program header.
+    
+    ;; need program header size
     mov bx, [elf_offset+e_phentsize_offset]
+    ;; need number of program headers 
     mov cx, [elf_offset+e_phnum_offset]
 
     mov eax, program_offset
-
-.LoadKernelSegments:
+    mov edx, 0x0
+        
+.GetKernelMemSize:
+    ;; calculate total memsz; copy memory to 0x100000
     ;; eax contains the address of the wanted program header
-    call load_kernel_segment	
+    
+    add edx, [eax + p_memsz_offset]
     add eax, ebx
     sub cx, 1
     cmp cx, 0
-    ja .LoadKernelSegments
-  
-    ;; copy kernel to higher address
-    ;; go back to real mode if there are still sectors left to be loaded
+    ja .GetKernelMemSize
+
+    mov ebx, 0x11000
+    mov eax, 0x100000
+    mov ecx, 0
+
+    ;; edx contain the total amount of memory that needs to be loaded
+.LoadKernel:
+    push edx
+    mov edx, [ebx]
+    mov [eax], edx
+    pop edx
     
+    add ebx, 4 			;if ebx == 0x9B000, load more memory starting at 0x11000
+    add eax, 4			
+    add ecx, 4			;ecx contains memory that has been loaded
+    cmp ecx, edx
+    jb .LoadKernel
+       
     mov edi, FREE_SPACE
     
     call SwitchToLongMode
 
-    ;; assumes that eax contains address of the program header
-load_kernel_segment:
-    push eax
-    push ebx
-    push ecx
-    push edx
-
-    mov ebx, 0x10000
-
-    ;;  this assumes that each page is 4k
-    lea edx, [0x100000 - 0x1000]
-
-    add ebx, [eax + p_offset_offset]
-    add edx, [eax + p_offset_offset]
-    mov ecx, 0
-
-    cmp ecx, [eax + p_memsz_offset]
-    je .load_kernel_segment_done
-
-    ;; if p_filesz < memsz zero out the rest of the memory
-
-    push ebx
-    push ecx
-    push edx
-
-    mov ebx, 0
     
-.ZeroOutRegion:
-    mov [edx], ebx
-    add ecx, 4
-    add edx, 4
-    cmp ecx, [eax + p_memsz_offset]
-    jb .ZeroOutRegion
-
-    pop edx
-    pop ecx
-    pop ebx
-    
-.MoveKernelMemory:
-    push eax
-
-    mov eax, [ebx]
-    mov [edx], eax
-    add ebx, 4
-    add edx, 4
-    add ecx, 4
-
-    pop eax
-    
-    cmp ecx, [eax + p_filesz_offset]	
-    jb .MoveKernelMemory
-
-
-.load_kernel_segment_done:    
-    
-    pop edx
-    pop ecx
-    pop ebx
-    pop eax
-    
-    ret
-        
 elf_offset equ 0x10000
 program_offset equ 0x10040
     ;; elf header offsets

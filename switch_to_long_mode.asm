@@ -40,13 +40,13 @@ SwitchToLongMode:
     pop edi
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Need to load each page table address into page directory.                                   ;;                         
-;; Each page table is offset by 4kb and points to 2 mb of physical memory.              ;;  
-;; each directory entry is 8 bytes with 512 entries. So in total 512 * 8 = 4096 bytes ;;
-;; level 4 page map is located at edi + 0x0000                                                        ;;                             
-;; page directory pointer is located at edi + 0x1000                                                ;;                              
-;; first page directory is located at edi + 0x2000                                                     ;;                              
-;; page table is located at edi + 0x3000                                                                  ;;                               
+;; Need to load each page table address into page directory.                                                            
+;; Each page table is offset by 4kb and points to 2 mb of physical memory.                
+;; each directory entry is 8 bytes with 512 entries. So in total 512 * 8 = 4096 bytes 
+;; level 4 page map is located at edi + 0x0000                                                                                     
+;; page directory pointer is located at edi + 0x1000                                                                              
+;; first page directory is located at edi + 0x2000                                                                                   
+;; page table is located at edi + 0x3000                                                                                                 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     ; Build the Page Map Level 4.
