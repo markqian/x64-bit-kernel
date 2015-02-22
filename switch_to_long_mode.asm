@@ -151,9 +151,20 @@ GDT:
     dq 0x0000000000000000             ; Null Descriptor - should be present.
  
 .Code:
-    dq 0x0020980000000000             ; 64-bit code descriptor. 
-    dq 0x0000900000000000             ; 64-bit data descriptor. 
- 
+    dw 0x0
+    dw 0x0
+    db 00000000b
+    db 10011000b
+    db 00100000b
+    db 00000000b
+
+    dw 0x0
+    dw 0x0
+    db 00000000b
+    db 10010000b
+    db 00000000b
+    db 00000000b
+    
 ALIGN 4
     dw 0                              ; Padding to make the "address of the GDT" field aligned on a 4-byte boundary
  

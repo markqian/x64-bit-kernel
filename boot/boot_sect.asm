@@ -144,5 +144,4 @@ MSG_REAL_MODE:	db "Started in 16-bit Real Mode",0
 MSG_LONG_MODE:	db "Successfully landed in Long Mode",0
 
     times 2046-($-$$) db 0xff	
-    dw 0xaa55
-
+    dw 0xface

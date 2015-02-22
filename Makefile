@@ -2,7 +2,7 @@ CFLAGS=-m64
 
 C_SOURCES = $(wildcard kernel/*.c drivers/*.c)
 HEADERS = $(wildcard kernel/*.h drivers/*.h)
-
+ASM_SOURCES = $(wildcard kernel/*.asm)
 OBJ = ${C_SOURCES:.c=.o}
 
 all: os.iso
@@ -24,6 +24,7 @@ kernel.bin: kernel/kernel_entry.o ${OBJ}
 
 %.o: %.c ${HEADERS}
 		x86_64-elf-gcc -ffreestanding -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -c $< -o $@ 
+		x86_64-elf-gcc -S -c $< 
 
 %.o: %.asm
 		nasm $< -f elf64 -o $@
@@ -39,3 +40,4 @@ clean:
 		rm -fr kernel/*.o boot/*.bin drivers/*.o
 		rm -fr *.iso
 		rm -fr *~ boot/*~ kernel/*~
+		rm -fr *.s
