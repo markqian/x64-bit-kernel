@@ -67,7 +67,7 @@ success:
 DiskAddressPacket:        
 DiskSize:   	db 0x10				;size of packet
 DiskZero:   	db 0					;always 0
-DiskTransfers:	dw 16				;number of sectors to read
+DiskTransfers:	dw 155				;number of sectors to read
 DiskOffset: 	dw KERNEL_OFFSET		;offset
 DiskSegment:	dw 0xf00				;segment
 DiskSector: 	dd 0					;starting LBA #

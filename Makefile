@@ -19,14 +19,20 @@ os.iso: os-image
 os-image: boot/boot_sect.bin kernel.bin
 		cat $^ > ./cdcontent/os-image
 
-kernel.bin: kernel/kernel_entry.o ${OBJ}
+kernel.bin: kernel/kernel_entry.o ${OBJ} kernel/kprint_hex.o kernel/gdt_load.o 
 		x86_64-elf-gcc -ffreestanding -z max-page-size=0x1000 -o $@ -T ./kernel/linker.ld $^ -nostdlib -lgcc 
 
 %.o: %.c ${HEADERS}
 		x86_64-elf-gcc -ffreestanding -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -c $< -o $@ 
-		x86_64-elf-gcc -S -c $< 
+		x86_64-elf-gcc -S -ffreestanding -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -c $< 
 
-%.o: %.asm
+%.o: %.asm 
+		nasm $< -f elf64 -o $@
+
+kernel/gdt_load.o: kernel/gdt_load.asm
+		nasm $< -f elf64 -o $@
+
+kernel/kprint_hex.o: kernel/kprint_hex.asm
 		nasm $< -f elf64 -o $@
 
 boot/boot_sect.bin: boot/boot_sect.asm

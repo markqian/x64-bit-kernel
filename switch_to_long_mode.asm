@@ -109,7 +109,7 @@ SwitchToLongMode:
     mov [edi], eax
     add eax, 0x1000
     add edi, 8
-    cmp eax, 0x200000
+    cmp eax, 0x300000
     jb .LoopKernelPageTable
     
     pop edi                            ; Restore DI.
@@ -180,5 +180,7 @@ LongMode:
     mov es, ax
     mov fs, ax
     mov gs, ax
+
+    mov rsp, 0xFFFFFFFF80200000
     
     jmp BEGIN_LM                     ; You should replace this jump to wherever you want to jump to.

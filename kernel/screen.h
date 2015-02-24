@@ -17,3 +17,4 @@ void print(char *message);
 void clear_screen();
 void memory_copy(char * source, char * dest, int no_bytes);
 int handle_scrolling(int cursor_offset);
+char * itoa(int value, char * str, int base);

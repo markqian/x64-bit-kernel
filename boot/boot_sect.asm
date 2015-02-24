@@ -48,7 +48,6 @@ Main:
 %include "print_hex_long.asm"
 %include "switch_to_pm.asm"
 %include "switch_to_long_mode.asm"
-    
 [bits 32]
  
 NoLongMode db "ERROR: CPU does not support long mode.", 0x0A, 0x0D, 0
@@ -129,6 +128,7 @@ load_kernel:
     
 BEGIN_LM:
     ; Blank out the screen to a blue color.     call 0x100000
+
     mov rbx, 0xffffff0000000008
     mov rdx, [rbx]
     call print_hex_long
