@@ -46,7 +46,7 @@ SwitchToLongMode:
 ;; level 4 page map is located at edi + 0x0000                                                                                     
 ;; page directory pointer is located at edi + 0x1000                                                                              
 ;; first page directory is located at edi + 0x2000                                                                                   
-;; page table is located at edi + 0x3000                                                                                                 
+;; identity map page table is located at edi + 0x3000                                                                                                 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     ; Build the Page Map Level 4.

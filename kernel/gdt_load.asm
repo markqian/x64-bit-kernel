@@ -14,14 +14,15 @@ gdt_load:
     mov fs,  ax
     mov gs, ax
     mov ss, ax
+    
     mov rsi, rsp
     mov rcx, .flush
-
-    push rax
-    push rsi
-    pushfq
-    push CODE_SEG
-    push rcx
+    
+    push rax				;set DATA_SEG
+    push rsi				;set RSP
+    pushfq					;set EFLAG
+    push QWORD CODE_SEG	;set CODE_SEG
+    push rcx				;far jump address
     iretq
 
 .flush:

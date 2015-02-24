@@ -2,6 +2,8 @@
 #include "gdt.h"
 
 void main() {
+  uint64_t in;
+
   init_gdt();
   clear_screen();
   char s[10];
@@ -20,5 +22,5 @@ void main() {
        "call	kprint_hex\n\t"       
   );
 
-  kprint_hex(0xb8000, gdt_entries[7]);
+  kprint_hex(0xb8000, ((tss_entry64_t *)&gdt_entries[5])->base_low);
  }
