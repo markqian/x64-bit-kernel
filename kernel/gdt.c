@@ -2,7 +2,7 @@
 
 void init_gdt() {
 
-  gdt_ptr.limit = (sizeof(gdt_entry_t) * 5) - 1;
+  gdt_ptr.limit = (sizeof(gdt_entry_t) * 7) - 1;
   gdt_ptr.base = gdt_entries;
   
   gdt_set_gate(0,0,0,0,0);
@@ -10,7 +10,8 @@ void init_gdt() {
   gdt_set_gate(2,0,0,0x92,0x20);
   gdt_set_gate(3,0,0,0xF8,0x20);
   gdt_set_gate(4,0,0,0xF2,0x20);
-  
+
+  gdt_set_tss(&gdt_entries[6],0,0,0);
   gdt_load(&gdt_ptr);
 
 }
@@ -27,5 +28,10 @@ void gdt_set_gate(int num, u32int base, u32int limit, u8int access, u8int gran) 
 
   gdt_entries[num].granularity |= gran & 0xF0;
   gdt_entries[num].access = access;
+
+}
+
+void gdt_set_tss(tss_entry_t* tss, u32int limit, u8int access, u8int gran) {
+
 
 }
