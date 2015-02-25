@@ -66,30 +66,30 @@ init_pm:
     call SwitchToLongMode
 
     
-elf_offset equ 0x10000
-program_offset equ 0x10040
+elf_offset 			equ 0x10000
+program_offset 	equ 0x10040
     ;; elf header offsets
-e_indent_offset equ 0
-e_type_offset equ 16
-e_machine_offset equ 18
-e_version_offset equ 20
-e_entry_offset equ 24
-e_phoff_offset equ 32
-e_shoff_offset equ 40
-e_flags_offset equ 48
-e_ehsize_offset equ 52
-e_phentsize_offset equ 54
-e_phnum_offset equ 56
-e_shentsize_offset equ 58
-e_shnum_offset equ 60
-e_shstrndx_offset equ 62
+e_indent_offset 	equ 0
+e_type_offset 		equ 16
+e_machine_offset 	equ 18
+e_version_offset 	equ 20
+e_entry_offset 		equ 24
+e_phoff_offset 		equ 32
+e_shoff_offset 		equ 40
+e_flags_offset 		equ 48
+e_ehsize_offset 	equ 52
+e_phentsize_offset 	equ 54
+e_phnum_offset 	equ 56
+e_shentsize_offset 	equ 58
+e_shnum_offset 	equ 60
+e_shstrndx_offset 	equ 62
 
     ;; program header offsets
-p_type_offset equ 0	
-p_flags_offset equ 4	
-p_offset_offset equ 8	
-p_vaddr_offset equ 16	
-p_paddr_offset equ 24	
-p_filesz_offset equ 32	
-p_memsz_offset equ 40
-p_align_offset equ 48
+p_type_offset 		equ 0	
+p_flags_offset 		equ 4	
+p_offset_offset 		equ 8	
+p_vaddr_offset 		equ 16	
+p_paddr_offset 	equ 24	
+p_filesz_offset 		equ 32	
+p_memsz_offset 	equ 40
+p_align_offset 		equ 48
