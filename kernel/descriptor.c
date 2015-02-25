@@ -1,4 +1,4 @@
-#include "gdt.h"
+#include "descriptor.h"
 
 void init_gdt() {
 

@@ -36,18 +36,18 @@ Main:
     jmp switch_to_pm
     jmp $
     
-%include "checkA20.asm"
-%include "enableA20.asm"
-%include "print_string.asm"
-%include "print_hex.asm"
-%include "mydisk_load.asm"
-%include "gdt.asm"
-%include "print_string_pm.asm"
-%include "print_hex_pm.asm"
-%include "print_string_long.asm"
-%include "print_hex_long.asm"
-%include "switch_to_pm.asm"
-%include "switch_to_long_mode.asm"
+%include "boot/checkA20.asm"
+%include "boot/enableA20.asm"
+%include "boot/print_string.asm"
+%include "boot/print_hex.asm"
+%include "boot/mydisk_load.asm"
+%include "boot/gdt.asm"
+%include "boot/print_string_pm.asm"
+%include "boot/print_hex_pm.asm"
+%include "boot/print_string_long.asm"
+%include "boot/print_hex_long.asm"
+%include "boot/switch_to_pm.asm"
+%include "boot/switch_to_long_mode.asm"
 [bits 32]
  
 NoLongMode db "ERROR: CPU does not support long mode.", 0x0A, 0x0D, 0

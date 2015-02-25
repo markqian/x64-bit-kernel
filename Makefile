@@ -1,6 +1,7 @@
 CFLAGS=-m64
 C_SOURCES = $(wildcard kernel/*.c drivers/*.c)
 HEADERS = $(wildcard kernel/*.h drivers/*.h)
+ASM_SOURCES = $(wildcard boot/*.asm)
 OBJ = ${C_SOURCES:.c=.o}
 
 all: os.iso

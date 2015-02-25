@@ -1,5 +1,5 @@
+#include "descriptor.h"
 #include "screen.h"
-#include "gdt.h"
 
 void main() {
   uint64_t in;
