@@ -1,5 +1,10 @@
 #include "descriptor.h"
 
+void init_descriptor_tables() {
+  init_gdt();
+  init_idt();
+}
+
 void init_gdt() {
 
   gdt_ptr.limit = (sizeof(gdt_entry_t) * 7) - 1;
@@ -95,6 +100,5 @@ void idt_set_gate(int num, uint64_t base, uint16_t sel, uint8_t flags) {
   idt_entries[num].always0 = 0;
   idt_entries[num].flags = flags;
   idt_entries[num].zero = 0;
-
 }
 

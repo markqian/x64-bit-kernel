@@ -63,8 +63,132 @@ void print_at(char * message, int col, int row) {
   }  
 }
 
+void putc(char c) {
+  print_char(c, -1, -1, WHITE_ON_BLACK);
+}
+
+void putw( long int n, char fc, char *bf ) {
+	char ch;
+	char *p = bf;
+
+	while( *p++ && n > 0 ) n--;
+	while( n-- > 0 ) putc(  fc );
+	while( ( ch = *bf++ ) ) putc( ch );
+}
+
+
 void print(char *message) {
   print_at(message, -1, -1);
+}
+
+int a2d( char ch ) {
+	if( ch >= '0' && ch <= '9' ) return ch - '0';
+	if( ch >= 'a' && ch <= 'f' ) return ch - 'a' + 10;
+	if( ch >= 'A' && ch <= 'F' ) return ch - 'A' + 10;
+	return -1;
+}
+
+
+char a2i( char ch, char **src, long int base, long int *nump ) {
+	long int num, digit;
+	char *p;
+
+	p = *src; num = 0;
+	while( ( digit = a2d( ch ) ) >= 0 ) {
+		if ( digit > base ) break;
+		num = num*base + digit;
+		ch = *p++;
+	}
+	*src = p; *nump = num;
+	return ch;
+}
+
+void ui2a( unsigned long int num, unsigned long int base, char *bf ) {
+	long int n = 0;
+	long int dgt;
+	unsigned long int d = 1;
+	
+	while( (num / d) >= base ) d *= base;
+	while( d != 0 ) {
+		dgt = num / d;
+		num %= d;
+		d /= base;
+		if( n || dgt > 0 || d == 0 ) {
+			*bf++ = dgt + ( dgt < 10 ? '0' : 'a' - 10 );
+			++n;
+		}
+	}
+	*bf = 0;
+}
+
+void i2a( long int num, char *bf ) {
+	if( num < 0 ) {
+		num = -num;
+		*bf++ = '-';
+	}
+	ui2a( num, 10, bf );
+}
+
+void format ( char *fmt, va_list va ) {
+	char bf[48];
+	char ch, lz;
+	long int w;
+	
+	while ( ( ch = *(fmt++) ) ) {
+		if ( ch != '%' )
+		  putc( ch );
+		else {
+		  lz = 0; w = 0;
+		  ch = *(fmt++);
+		  switch ( ch ) {
+		  case '0':
+		    lz = 1; ch = *(fmt++);
+		    break;
+		  case '1':
+		  case '2':
+		  case '3':
+		  case '4':
+		  case '5':
+		  case '6':
+		  case '7':
+		  case '8':
+		  case '9':
+		    ch = a2i(ch, &fmt, 10, &w );
+		    break;
+		  }
+		  switch( ch ) {
+		  case 0: return;
+		  case 'c':
+		    putc(  va_arg( va, int ) );
+		    break;
+		  case 's':
+		    putw( w, 0, va_arg( va, char* ) );
+		    break;
+		  case 'u':
+		    ui2a( va_arg( va, unsigned long int ), 10, bf );
+		    putw( w, lz, bf );
+		    break;
+		  case 'd':
+		    i2a(va_arg( va, long int ), bf );
+		    putw(w, lz, bf );
+		    break;
+		  case 'x':
+		    ui2a(va_arg( va, unsigned long int ), 16, bf );
+		    putw(w, lz, bf );
+		    break;
+		  case '%':
+		    putc( ch );
+		    break;
+		  }
+		}
+	}
+}
+
+void printf(char *fmt, ...) {
+  va_list va;
+  va_start(va,fmt);
+  format( fmt, va );
+  va_end(va);
 }
 
 void clear_screen() {
