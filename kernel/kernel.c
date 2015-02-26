@@ -5,6 +5,7 @@ void main() {
   uint64_t in;
 
   init_gdt();
+  init_idt();
   clear_screen();
   char s[10];
   s[0] = '1';
@@ -22,5 +23,11 @@ void main() {
        "call	kprint_hex\n\t"       
   );
 
-  kprint_hex(0xb8000, ((tss_entry64_t *)&gdt_entries[5])->base_low);
+  kprint_hex(0xb8028, ((tss_entry64_t *)&gdt_entries[5])->base_low);
+  kprint_hex(0xb8050, ((tss_entry64_t *)&gdt_entries[5])->base_low);
+  kprint_hex(0xb8050+0x28, ((tss_entry64_t *)&gdt_entries[5])->base_low);
+  kprint_hex(0xb8050+0x28+0x28, ((tss_entry64_t *)&gdt_entries[5])->base_low);
+
+  __asm__ volatile("int $0x3");
+
  }
