@@ -22,7 +22,6 @@ init_pm:
     mov ebp, 0x90000
     mov esp, ebp
 
-
     ;; load kernel elf header
     ;; load memory based on program header.
     
@@ -43,9 +42,10 @@ init_pm:
     sub cx, 1
     cmp cx, 0
     ja .GetKernelMemSize
-
-    mov ebx, 0x11000
-    mov eax, 0x100000
+    
+    mov ebx, load_address
+    add ebx, [program_offset + p_offset_offset]
+    mov eax, relocation_address
     mov ecx, 0
 
     ;; edx contain the total amount of memory that needs to be loaded
@@ -60,13 +60,68 @@ init_pm:
     add ecx, 4			;ecx contains memory that has been loaded
     cmp ecx, edx
     jb .LoadKernel
-       
+
+    mov ebx, 0
+    mov ecx, 0
+    
+    mov bx, [elf_offset+e_phentsize_offset]			;sizeof program headers
+    mov eax, program_offset 						;set eax to program offset
+    mov cx, [elf_offset+e_phnum_offset] 				;set cx to number of program headers
+
+    ;; zero out bss section
+    ;; analyze each program header
+    ;; if memsz > filesz then zero out offset: data_offset + filesz
+    ;; length: memsz - filesz		
+
+ .ZeroOutBss:
+    push ecx
+    
+    add edx, [eax + p_memsz_offset]
+    add ecx, [eax + p_filesz_offset]
+    cmp edx, ecx
+    jbe .NextProgramHeader
+
+    mov edi, relocation_address
+    add edi, [eax + p_offset_offset]
+    add edi, [eax + p_filesz_offset]
+    sub edi, [program_offset + p_offset_offset]
+    
+    add esi, [eax + p_memsz_offset]
+    sub esi, [eax + p_filesz_offset]
+    
+    push eax			;need spare registers
+    push ecx
+
+    mov ecx, 0
+    mov eax, 0
+
+ .ZeroOutSection:
+    mov [edi], eax
+    add edi, 4
+    add ecx, 4
+    cmp ecx, esi
+    jb .ZeroOutSection
+
+    pop ecx
+    pop eax
+
+.NextProgramHeader:    
+    
+    add eax, ebx
+
+    pop ecx		
+
+    sub cx, 1
+    cmp cx, 0 
+    ja .ZeroOutBss
+    
     mov edi, FREE_SPACE
     
     call SwitchToLongMode
 
-    
-elf_offset 			equ 0x10000
+load_address		equ 0x10000	
+relocation_address	equ 0x100000    
+elf_offset 			equ 0x10000 ;assume elf header size is 64 bytes
 program_offset 	equ 0x10040
     ;; elf header offsets
 e_indent_offset 	equ 0
@@ -93,3 +148,5 @@ p_paddr_offset 	equ 24
 p_filesz_offset 		equ 32	
 p_memsz_offset 	equ 40
 p_align_offset 		equ 48
+
+    

@@ -1,12 +1,17 @@
 #include "descriptor.h"
 #include "screen.h"
+#include "timer.h"
 
-void main() {
-  init_descriptor_tables();
+void kmain() {
   clear_screen();
-  print("Hello World!\n");
-  print("I was here!\n");
 
-  __asm__ volatile("int $0x3\n\t");
+  init_descriptor_tables();
+  
+  asm volatile("sti");
+  
+  init_timer(50);
+
+
+  //  __asm__ volatile("int $0x13\n\t");
 
  }

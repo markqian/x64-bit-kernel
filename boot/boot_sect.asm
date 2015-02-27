@@ -129,9 +129,6 @@ load_kernel:
 BEGIN_LM:
     ; Blank out the screen to a blue color.     call 0x100000
 
-    mov rbx, 0xffffff0000000008
-    mov rdx, [rbx]
-    call print_hex_long
     mov rbx, 0xffffffff80000000
     call rbx		
     jmp $

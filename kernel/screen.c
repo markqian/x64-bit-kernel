@@ -5,20 +5,20 @@ int get_screen_offset(int col, int row) {
 }
 
 int get_cursor() {
-  port_byte_out(REG_SCREEN_CTRL, 14);
-  int offset = port_byte_in(REG_SCREEN_DATA) << 8;
-  port_byte_out(REG_SCREEN_CTRL, 15);
-  offset += port_byte_in(REG_SCREEN_DATA);
+  outb(REG_SCREEN_CTRL, 14);
+  int offset = inb(REG_SCREEN_DATA) << 8;
+  outb(REG_SCREEN_CTRL, 15);
+  offset += inb(REG_SCREEN_DATA);
 
   return offset*2;
 }
 
 void set_cursor(int offset) {
   offset /= 2;
-  port_byte_out(REG_SCREEN_CTRL, 14);
-  port_byte_out(REG_SCREEN_DATA, (unsigned char) (offset >> 8)&0xFF);
-  port_byte_out(REG_SCREEN_CTRL, 15);
-  port_byte_out(REG_SCREEN_DATA, (unsigned char) (offset&0xFF));
+  outb(REG_SCREEN_CTRL, 14);
+  outb(REG_SCREEN_DATA, (unsigned char) (offset >> 8)&0xFF);
+  outb(REG_SCREEN_CTRL, 15);
+  outb(REG_SCREEN_DATA, (unsigned char) (offset&0xFF));
 }
 
 void print_char(char character, int col, int row, char attribute_byte) {
@@ -68,12 +68,12 @@ void putc(char c) {
 }
 
 void putw( long int n, char fc, char *bf ) {
-	char ch;
-	char *p = bf;
-
-	while( *p++ && n > 0 ) n--;
-	while( n-- > 0 ) putc(  fc );
-	while( ( ch = *bf++ ) ) putc( ch );
+  char ch;
+  char *p = bf;
+  
+  while( *p++ && n > 0 ) n--;
+  while( n-- > 0 ) putc(  fc );
+  while( ( ch = *bf++ ) ) putc( ch );
 }
 
 
@@ -82,106 +82,106 @@ void print(char *message) {
 }
 
 int a2d( char ch ) {
-	if( ch >= '0' && ch <= '9' ) return ch - '0';
-	if( ch >= 'a' && ch <= 'f' ) return ch - 'a' + 10;
-	if( ch >= 'A' && ch <= 'F' ) return ch - 'A' + 10;
-	return -1;
+  if( ch >= '0' && ch <= '9' ) return ch - '0';
+  if( ch >= 'a' && ch <= 'f' ) return ch - 'a' + 10;
+  if( ch >= 'A' && ch <= 'F' ) return ch - 'A' + 10;
+  return -1;
 }
 
 
 char a2i( char ch, char **src, long int base, long int *nump ) {
-	long int num, digit;
-	char *p;
+  long int num, digit;
+  char *p;
 
-	p = *src; num = 0;
-	while( ( digit = a2d( ch ) ) >= 0 ) {
-		if ( digit > base ) break;
-		num = num*base + digit;
-		ch = *p++;
-	}
-	*src = p; *nump = num;
-	return ch;
+  p = *src; num = 0;
+  while( ( digit = a2d( ch ) ) >= 0 ) {
+    if ( digit > base ) break;
+    num = num*base + digit;
+    ch = *p++;
+  }
+  *src = p; *nump = num;
+  return ch;
 }
 
 void ui2a( unsigned long int num, unsigned long int base, char *bf ) {
-	long int n = 0;
-	long int dgt;
-	unsigned long int d = 1;
-	
-	while( (num / d) >= base ) d *= base;
-	while( d != 0 ) {
-		dgt = num / d;
-		num %= d;
-		d /= base;
-		if( n || dgt > 0 || d == 0 ) {
-			*bf++ = dgt + ( dgt < 10 ? '0' : 'a' - 10 );
-			++n;
-		}
-	}
-	*bf = 0;
+  long int n = 0;
+  long int dgt;
+  unsigned long int d = 1;
+  
+  while( (num / d) >= base ) d *= base;
+  while( d != 0 ) {
+    dgt = num / d;
+    num %= d;
+    d /= base;
+    if( n || dgt > 0 || d == 0 ) {
+      *bf++ = dgt + ( dgt < 10 ? '0' : 'a' - 10 );
+      ++n;
+    }
+  }
+  *bf = 0;
 }
 
 void i2a( long int num, char *bf ) {
-	if( num < 0 ) {
-		num = -num;
-		*bf++ = '-';
-	}
-	ui2a( num, 10, bf );
+  if( num < 0 ) {
+    num = -num;
+    *bf++ = '-';
+  }
+  ui2a( num, 10, bf );
 }
 
 void format ( char *fmt, va_list va ) {
-	char bf[48];
-	char ch, lz;
-	long int w;
-	
-	while ( ( ch = *(fmt++) ) ) {
-		if ( ch != '%' )
-		  putc( ch );
-		else {
-		  lz = 0; w = 0;
-		  ch = *(fmt++);
-		  switch ( ch ) {
-		  case '0':
-		    lz = 1; ch = *(fmt++);
-		    break;
-		  case '1':
-		  case '2':
-		  case '3':
-		  case '4':
-		  case '5':
-		  case '6':
-		  case '7':
-		  case '8':
-		  case '9':
-		    ch = a2i(ch, &fmt, 10, &w );
-		    break;
-		  }
-		  switch( ch ) {
-		  case 0: return;
-		  case 'c':
-		    putc(  va_arg( va, int ) );
-		    break;
-		  case 's':
-		    putw( w, 0, va_arg( va, char* ) );
-		    break;
-		  case 'u':
-		    ui2a( va_arg( va, unsigned long int ), 10, bf );
-		    putw( w, lz, bf );
-		    break;
-		  case 'd':
-		    i2a(va_arg( va, long int ), bf );
-		    putw(w, lz, bf );
-		    break;
-		  case 'x':
-		    ui2a(va_arg( va, unsigned long int ), 16, bf );
-		    putw(w, lz, bf );
-		    break;
-		  case '%':
-		    putc( ch );
-		    break;
-		  }
-		}
-	}
+  char bf[48];
+  char ch, lz;
+  long int w;
+  
+  while ( ( ch = *(fmt++) ) ) {
+    if ( ch != '%' )
+      putc( ch );
+    else {
+      lz = 0; w = 0;
+      ch = *(fmt++);
+      switch ( ch ) {
+      case '0':
+	lz = 1; ch = *(fmt++);
+	break;
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+	ch = a2i(ch, &fmt, 10, &w );
+	break;
+      }
+      switch( ch ) {
+      case 0: return;
+      case 'c':
+	putc(  va_arg( va, int ) );
+	break;
+      case 's':
+	putw( w, 0, va_arg( va, char* ) );
+	break;
+      case 'u':
+	ui2a( va_arg( va, unsigned long int ), 10, bf );
+	putw( w, lz, bf );
+	break;
+      case 'd':
+	i2a(va_arg( va, long int ), bf );
+	putw(w, lz, bf );
+	break;
+      case 'x':
+	ui2a(va_arg( va, unsigned long int ), 16, bf );
+	putw(w, lz, bf );
+	break;
+      case '%':
+	putc( ch );
+	break;
+      }
+    }
+  }
 }
 
 void printf(char *fmt, ...) {
