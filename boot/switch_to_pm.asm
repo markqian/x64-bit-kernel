@@ -1,4 +1,5 @@
-[bits 16]    
+[bits 16]
+    
 ; Switch to protected mode
 switch_to_pm:
     cli
@@ -22,6 +23,9 @@ init_pm:
     mov ebp, 0x90000
     mov esp, ebp
 
+    ;; need to check if valid elf file
+    ;; also need to check if it's 64 or 32 bits
+   
     ;; load kernel elf header
     ;; load memory based on program header.
     
@@ -42,7 +46,8 @@ init_pm:
     sub cx, 1
     cmp cx, 0
     ja .GetKernelMemSize
-    
+
+    ;; get load address which should be 0x10000, relocation is at 1 mb
     mov ebx, load_address
     add ebx, [program_offset + p_offset_offset]
     mov eax, relocation_address
@@ -61,7 +66,7 @@ init_pm:
     cmp ecx, edx
     jb .LoadKernel
 
-    mov ebx, 0
+    mov ebx, 0			;init to zero since we are using lower half.
     mov ecx, 0
     
     mov bx, [elf_offset+e_phentsize_offset]			;sizeof program headers
@@ -92,7 +97,7 @@ init_pm:
     push eax			;need spare registers
     push ecx
 
-    mov ecx, 0
+    mov ecx, 0			;init to zero for counter
     mov eax, 0
 
  .ZeroOutSection:
@@ -102,7 +107,7 @@ init_pm:
     cmp ecx, esi
     jb .ZeroOutSection
 
-    pop ecx
+    pop ecx			;restore
     pop eax
 
 .NextProgramHeader:    
@@ -119,12 +124,11 @@ init_pm:
     
     call SwitchToLongMode
 
-load_address		equ 0x10000	
-relocation_address	equ 0x100000    
-elf_offset 			equ 0x10000 ;assume elf header size is 64 bytes
+load_address		equ 0x10000 	; where we initally load the kernel.
+relocation_address	equ 0x100000 	; where the kernel is going to be relocated.
+elf_offset 			equ 0x10000 	; assume elf header size is 64 bytes.
 program_offset 	equ 0x10040
-    ;; elf header offsets
-e_indent_offset 	equ 0
+e_indent_offset 	equ 0	  	; elf header offsets.
 e_type_offset 		equ 16
 e_machine_offset 	equ 18
 e_version_offset 	equ 20
@@ -139,8 +143,7 @@ e_shentsize_offset 	equ 58
 e_shnum_offset 	equ 60
 e_shstrndx_offset 	equ 62
 
-    ;; program header offsets
-p_type_offset 		equ 0	
+p_type_offset 		equ 0	    	; program header offsets
 p_flags_offset 		equ 4	
 p_offset_offset 		equ 8	
 p_vaddr_offset 		equ 16	

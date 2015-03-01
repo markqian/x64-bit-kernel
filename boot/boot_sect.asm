@@ -30,10 +30,20 @@ Main:
     jne .LoadKernel
     call enable_A20
 
-.LoadKernel:    
+.LoadKernel:
+    mov di, 0x1000
+    call do_e820
+
+    mov dx, bp
+    call print_hex
+
+    mov dx, [0x1000 + 24*3+8]
+    call print_hex
+
     call load_kernel
-    
+
     jmp switch_to_pm
+
     jmp $
     
 %include "boot/checkA20.asm"
@@ -48,6 +58,7 @@ Main:
 %include "boot/print_hex_long.asm"
 %include "boot/switch_to_pm.asm"
 %include "boot/switch_to_long_mode.asm"
+%include "boot/do_e820.asm"
 [bits 32]
  
 NoLongMode db "ERROR: CPU does not support long mode.", 0x0A, 0x0D, 0
@@ -128,6 +139,8 @@ load_kernel:
     
 BEGIN_LM:
     ; Blank out the screen to a blue color.     call 0x100000
+    mov rdi, 0x1000		; set up arguments for kmain
+    mov rsi, [mmap_ent]
 
     mov rbx, 0xffffffff80000000
     call rbx		
@@ -135,6 +148,7 @@ BEGIN_LM:
 
 [bits 16]    
 BOOT_DRIVE:  db 0
+mmap_ent:   dd 0
 MSG_PROT_MODE:	db "Successfully landed in 32-bit Protected Mode",0
 MSG_LOAD_KERNEL:    db "Loading kernel into memory",0
 MSG_REAL_MODE:	db "Started in 16-bit Real Mode",0

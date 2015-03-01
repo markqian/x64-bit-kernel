@@ -18,7 +18,6 @@ void init_timer(uint64_t frequency) {
   outb(0x43, 0x36);
   uint8_t l = (uint8_t)(divisor & 0xFF);
   uint8_t h = (uint8_t)( (divisor>>8) & 0xFF );
-  printf("divisor is: %x\n", tick);
 
   outb(0x40, l);
   outb(0x40, h);

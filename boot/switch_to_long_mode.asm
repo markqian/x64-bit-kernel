@@ -1,4 +1,5 @@
 [bits 32]
+    
 %define PAGE_PRESENT    (1 << 0)
 %define PAGE_WRITE      (1 << 1)
  
