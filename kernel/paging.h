@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-typedef struct page {
+struct page {
   
   uint64_t present : 1;
   uint64_t rw : 1;
@@ -10,4 +10,5 @@ typedef struct page {
   uint64_t unused : 7;
   uint64_t frame : 52;
 
-} page_t;
+} __attribute__((packed)); 
+typedef struct page page_t;

@@ -30,16 +30,19 @@ SwitchToLongMode:
     
 ; zero out tables
     push edi
-    
+    push edx
+
+    lea edx, [edi + 0x6000]
     mov eax, 0x0
 .ZeroOutAllTable:
     mov [edi], eax	;zero out
     add edi, 4			
-    cmp edi, 0x4000	
+    cmp edi, edx	
     jb .ZeroOutAllTable
 
+    pop edx
     pop edi
-    
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Need to load each page table address into page directory.                                                            
 ;; Each page table is offset by 4kb and points to 2 mb of physical memory.                
@@ -183,6 +186,6 @@ LongMode:
     mov fs, ax
     mov gs, ax
 
-    mov rsp, 0xFFFFFFFF80200000
-    
+    mov rsp, 0x90000
+
     jmp BEGIN_LM                     ; You should replace this jump to wherever you want to jump to.

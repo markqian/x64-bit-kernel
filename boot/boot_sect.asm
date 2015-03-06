@@ -1,7 +1,7 @@
 [org 0x7c00]
     %define KERNEL_OFFSET 0x1000
     %define FREE_SPACE 0x9000
-
+    %define MEMORY_MAP 0x1000
 Main:
     ; Some BIOS' may load us at 0x0000:0x7C00 while other may load us at 0x07C0:0x0000.    
     jmp 0x0000:.FlushCS               
@@ -31,14 +31,8 @@ Main:
     call enable_A20
 
 .LoadKernel:
-    mov di, 0x1000
+    mov di, MEMORY_MAP
     call do_e820
-
-    mov dx, bp
-    call print_hex
-
-    mov dx, [0x1000 + 24*3+8]
-    call print_hex
 
     call load_kernel
 
@@ -139,7 +133,7 @@ load_kernel:
     
 BEGIN_LM:
     ; Blank out the screen to a blue color.     call 0x100000
-    mov rdi, 0x1000		; set up arguments for kmain
+    mov rdi, MEMORY_MAP		; set up arguments for kmain
     mov rsi, [mmap_ent]
 
     mov rbx, 0xffffffff80000000

@@ -1,13 +1,13 @@
 #include "isr.h"
 
 void isr_handler(registers_t regs) {
-  print("recieved interrupt: ");
-  printf("I was here %x", regs.rbp);
-  print("\n");
+  kprint("recieved interrupt: ");
+  kprintf("I was here %x", regs.rbp);
+  kprint("\n");
 }
 
 void irq_handler(registers_t regs) {
-  print("recieved interrupt: ");
+  kprint("recieved interrupt: ");
 
   if (regs.int_no >= 40) {
     outb(0xA0, 0x20);

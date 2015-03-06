@@ -7,7 +7,7 @@ uint64_t tick = 0;
 
 void timer_callback(registers_t regs) {
   tick++;
-  printf("Tick: %d\n", tick);
+  kprintf("Tick: %d\n", tick);
 }
 
 void init_timer(uint64_t frequency) {

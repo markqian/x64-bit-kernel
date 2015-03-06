@@ -78,7 +78,7 @@ init_pm:
     ;; if memsz > filesz then zero out offset: data_offset + filesz
     ;; length: memsz - filesz		
 
- .ZeroOutBss:
+.ZeroOutBss:
     push ecx
     
     add edx, [eax + p_memsz_offset]
@@ -100,7 +100,7 @@ init_pm:
     mov ecx, 0			;init to zero for counter
     mov eax, 0
 
- .ZeroOutSection:
+.ZeroOutSection:
     mov [edi], eax
     add edi, 4
     add ecx, 4
@@ -119,7 +119,8 @@ init_pm:
     sub cx, 1
     cmp cx, 0 
     ja .ZeroOutBss
-    
+
+skip:	
     mov edi, FREE_SPACE
     
     call SwitchToLongMode
