@@ -48,7 +48,7 @@ int find_contigious_pages(int sz) {
   return -1;
 }
 
-uint64_t alloc_contigious_pages(int sz) {
+uint64_t *alloc_contigious_pages(int sz) {
   uint64_t i,j;
   uint64_t addr;
 
@@ -65,7 +65,7 @@ uint64_t alloc_contigious_pages(int sz) {
 
   addr = i;
 
-  return addr;
+  return (uint64_t*)addr;
 }
 
 void free_contigious_pages(uint64_t addr, int sz) {
@@ -102,7 +102,7 @@ int find_free_page() {
   return i;
 }
 
-uint64_t alloc_page() {
+uint64_t *alloc_page() {
   int i = 0;
   uint64_t addr;
 
@@ -118,7 +118,7 @@ uint64_t alloc_page() {
 
   addr = i;
 
-  return addr;
+  return (uint64_t*)addr;
 }
 
 
@@ -126,10 +126,70 @@ void free_page(uint64_t addr) {
   unset_bit(addr / PAGE_SIZE);
 }
 
-void init_physical_manager() {
-  //find starting memory
-  //parse memory map
-  //init used pages
-  
+void set_region(uint64_t base, uint64_t length) {
+  int i;
 
+  if (length < PAGE_SIZE) {
+    set_bit(base/PAGE_SIZE);
+    pages_used += 1;
+  }
+  else {
+    for (i=0; i<length/PAGE_SIZE; i++) {      
+      set_bit(base/PAGE_SIZE + i);
+    }
+    pages_used += length/PAGE_SIZE;
+
+  }
+}
+
+
+void unset_region(uint64_t base, uint64_t length) {
+  int i;
+
+  if (length < PAGE_SIZE) {
+    unset_bit(base/PAGE_SIZE);
+    pages_used -= 1;
+  }
+  else {
+    for (i=0; i<length/PAGE_SIZE; i++) {
+      unset_bit(base/PAGE_SIZE + i);
+    }
+    pages_used -= length/PAGE_SIZE;
+  }
+}
+
+void set_rest(uint64_t base) {
+  int i;
+
+  for (i=base/PAGE_SIZE; i<M_LIMIT; i++) {
+    bitmap[i] = 0xffffffffffffffff;
+  }
+}
+
+
+void init_physical_manager(mem_info *m_info, int n_entries) {
+  int i;
+  //initialize the kernel size variable.
+  kernel_size = (uint64_t)&kernel_end - (uint64_t)&kernel_start;
+  pages_used = 0;
+
+  for (i = 0; i<n_entries; i++) {
+
+    if (m_info[i].type == USABLE_REGION) {
+
+      //the region we are interested in
+      if (m_info[i].base == 0x100000) {
+	//not interested in region below 1MB so set it as used. 
+	set_region(0, 0x100000); 
+	//set kernel region as used.
+	set_region(m_info[i].base, kernel_size);
+	//set rest of the bitmap as used since it's not being used.
+	set_rest(m_info[i].base+m_info[i].length);
+	
+	heap_base = 0x100000;
+	heap_size = m_info[i].length;
+      }
+
+    }
+  }
 }

@@ -2,28 +2,23 @@
 #include "screen.h"
 #include "timer.h"
 #include "kheap.h"
-
-
-typedef struct memory_info {
-  uint64_t base;                      
-  uint64_t length;                   
-  uint32_t type;
-  uint32_t reserved;
-} mem_info; 
-
+#include "paging.h"
 
 void kmain(mem_info *m_info, int n_entries) {
   clear_screen();
-
-  //init kernel variables
-  uint64_t kernel_size;
-  uint64_t load_address;
   init_descriptor_tables();
-  kernel_size = (uint64_t)&kernel_end - (uint64_t)&kernel_start;
+  init_physical_manager(m_info, n_entries);
 
-  uint64_t p = alloc_contigious_pages(1000); 
-  p = alloc_contigious_pages(10);
-  uint64_t k = bitmap[15];
-  kprintf("0x%x\n", k);
+  map((uint64_t)0xFFFF8aaaa0000000); 
+
+  uint64_t * p = (uint64_t *) 0xFFFF8aaaa0000000;
+ 
+  kprintf("0x%x\n", bitmap[0]);
+  kprintf("0x%x\n", bitmap[1]);
+  kprintf("0x%x\n", bitmap[2]);
+  kprintf("0x%x\n", bitmap[3]);
+  kprintf("0x%x\n", bitmap[4]);
+  kprintf("0x%x\n", bitmap[5]);
+  kprintf("0x%x\n", bitmap[6]);
 
  }

@@ -86,9 +86,9 @@ SwitchToLongMode:
     ;; build kernel map
     lea eax, [edi]        
     or eax, PAGE_PRESENT | PAGE_WRITE
-    mov [edi+0xff0], eax 	;move the first entry of PML4 into its last entry for recursive page mapping. 
+    mov [edi+0xff0], eax 	;move the first entry of PML4 into its second last entry for recursive page mapping. 
 
-    ;; fill second last entry of  PML4 with address edi + 0x4000
+    ;; fill last entry of  PML4 with address edi + 0x4000
     lea eax, [edi + 0x4000]         ; Put the address of the Page Directory Pointer Table in to EAX.
     or eax, PAGE_PRESENT | PAGE_WRITE ; Or EAX with the flags - present flag, writable flag.
     mov [edi+0xff8], eax                  ; Store the value of EAX as the last PML4E.
