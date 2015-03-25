@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "ide_controller.h"
 
 #define IRQ0 32
 #define IRQ1 33
@@ -31,3 +32,6 @@ void irq_handler(registers_t regs);
 typedef void (*isr_t)(registers_t);
 void register_interrupt_handler(uint8_t n, isr_t handler);
 isr_t interrupt_handlers[256];
+
+unsigned char ide_irq_invoked;
+void wait_for_irq15();

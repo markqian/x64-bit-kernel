@@ -32,7 +32,7 @@ SwitchToLongMode:
     push edi
     push edx
 
-    lea edx, [edi + 0x6000]
+    lea edx, [edi + 0x9000]
     mov eax, 0x0
 .ZeroOutAllTable:
     mov [edi], eax	;zero out
@@ -187,5 +187,4 @@ LongMode:
     mov gs, ax
 
     mov rsp, 0x90000
-
     jmp BEGIN_LM                     ; You should replace this jump to wherever you want to jump to.

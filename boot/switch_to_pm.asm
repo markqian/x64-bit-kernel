@@ -122,7 +122,7 @@ init_pm:
 
 skip:	
     mov edi, FREE_SPACE
-    
+
     call SwitchToLongMode
 
 load_address		equ 0x10000 	; where we initally load the kernel.

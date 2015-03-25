@@ -53,6 +53,59 @@ uint64_t *get_pt_table(uint64_t pml4_entry, uint64_t pdp_entry, uint64_t pd_entr
      (uint64_t)pd_entry * (uint64_t)0x1000);
 }
 
+void unmap_page(uint64_t virtualaddr) {
+  uint64_t *pml4_table;
+  uint64_t *pdp_table;
+  uint64_t *pd_table;
+  uint64_t *pt_table;
+  uint64_t *freepage;
+
+  uint64_t pml4_entry;
+  uint64_t pdp_entry;
+  uint64_t pd_entry;
+  uint64_t pt_entry;
+
+  pml4_table = (uint64_t *) 0xFFFFFF7FBFDFE000;
+  //get entry number in table
+  pml4_entry = get_pml4_index(virtualaddr);
+  //check if page present not in PML4 table
+  if (!(pml4_table[pml4_entry] & 0x3)) {
+    //if not present
+    return;
+  } 
+
+  //if page present then move on to pdp
+  pdp_table = get_pdp_table(pml4_entry);
+  //get entry number in table
+  pdp_entry = get_pdp_index(virtualaddr);
+  //check if empty
+  if (!(pdp_table[pdp_entry] & 0x3)) {
+    //not present
+    return;
+  }
+
+  //set up pd table
+  pd_table = get_pd_table(pml4_entry, pdp_entry);
+  //get pd index
+  pd_entry = get_pd_index(virtualaddr);
+  //check if empty
+  if (!(pd_table[pd_entry] & 0x3)) {
+    //not present
+    return;
+  }
+
+  //get pt table
+  pt_table = get_pt_table(pml4_entry, pdp_entry, pd_entry);
+  //get pt index
+  pt_entry = get_pt_index(virtualaddr);
+  //check if empty
+  if (!(pt_table[pt_entry] & 0x3)) {
+    //set to null
+    free_page(pt_table[pt_entry] & ~0xFFF);
+    pt_table[pt_entry] = 0x0;
+  }
+}
+
 void map(uint64_t virtualaddr) {
   uint64_t *pml4_table;
   uint64_t *pdp_table;

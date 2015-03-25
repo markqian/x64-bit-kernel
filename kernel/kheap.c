@@ -64,6 +64,7 @@ uint64_t *alloc_contigious_pages(int sz) {
   i *= PAGE_SIZE;
 
   addr = i;
+  pages_used += sz;
 
   return (uint64_t*)addr;
 }
@@ -74,6 +75,7 @@ void free_contigious_pages(uint64_t addr, int sz) {
     unset_bit(addr / PAGE_SIZE);
     addr += PAGE_SIZE;
   }
+  pages_used -= sz;
 }
 
 
@@ -118,12 +120,14 @@ uint64_t *alloc_page() {
 
   addr = i;
 
+  pages_used++;
   return (uint64_t*)addr;
 }
 
 
 void free_page(uint64_t addr) { 
   unset_bit(addr / PAGE_SIZE);
+  pages_used--;
 }
 
 void set_region(uint64_t base, uint64_t length) {
@@ -166,12 +170,21 @@ void set_rest(uint64_t base) {
   }
 }
 
+void unset_rest(uint64_t base) {
+ int i;
+
+  for (i=base/PAGE_SIZE; i<M_LIMIT; i++) {
+    bitmap[i] = 0x0;
+  }
+}
+
 
 void init_physical_manager(mem_info *m_info, int n_entries) {
   int i;
   //initialize the kernel size variable.
   kernel_size = (uint64_t)&kernel_end - (uint64_t)&kernel_start;
   pages_used = 0;
+  unset_rest(0);
 
   for (i = 0; i<n_entries; i++) {
 
@@ -186,7 +199,7 @@ void init_physical_manager(mem_info *m_info, int n_entries) {
 	//set rest of the bitmap as used since it's not being used.
 	set_rest(m_info[i].base+m_info[i].length);
 	
-	heap_base = 0x100000;
+	heap_base = 0x100000 + kernel_size;
 	heap_size = m_info[i].length;
       }
 

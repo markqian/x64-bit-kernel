@@ -134,10 +134,10 @@ load_kernel:
 BEGIN_LM:
     ; Blank out the screen to a blue color.     call 0x100000
     mov rdi, MEMORY_MAP		; set up arguments for kmain
-    mov rsi, [mmap_ent]
+    mov rsi, [mmap_ent]		
 
     mov rbx, 0xffffffff80000000
-    call rbx		
+    call rbx
     jmp $
 
 [bits 16]    

@@ -3,14 +3,14 @@
 #include "screen.h"
 #include "low_level.h"
 
-uint64_t tick = 0;
 
 void timer_callback(registers_t regs) {
   tick++;
-  kprintf("Tick: %d\n", tick);
+  /* kprintf("Tick: %d\n", tick);   */
 }
 
 void init_timer(uint64_t frequency) {
+  tick = 0;
   register_interrupt_handler(IRQ0, &timer_callback);
 
   uint64_t divisor = 1193180 / frequency;
